@@ -28,37 +28,32 @@ def run():
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
 
     # Setup face detection models
-    if not args.gpu:  # CPU: use dlib
-        raise NotImplementedError
-
-    else:  # GPU: use FAN (better)
-        # 导入人脸检测模型
-        mp_face_detection = mp.solutions.face_detection
-        face_detector = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
-        
-        # 导入三维人脸关键点检测模型
-        mp_face_mesh=mp.solutions.face_mesh
-        face_mesh_model=mp_face_mesh.FaceMesh(
-            static_image_mode=False,#TRUE:静态图片/False:摄像头实时读取
-            refine_landmarks=True,#使用Attention Mesh模型
-            max_num_faces=1,#最多检测几张人脸
-            min_detection_confidence=0.5, #置信度阈值，越接近1越准
-            min_tracking_confidence=0.5,#追踪阈值
-        )
     
-    pose_model = pickle.load(open('./model.pkl', 'rb'))
+    # Import face detection model
+    mp_face_detection = mp.solutions.face_detection
+    face_detector = mp_face_detection.FaceDetection(min_detection_confidence=0.5)
+
+    # Import 3D face landmark detection model
+    mp_face_mesh = mp.solutions.face_mesh
+    face_mesh_model = mp_face_mesh.FaceMesh(
+        static_image_mode=False,  # TRUE: static image / False: real-time camera input
+        refine_landmarks=True,  # Use the Attention Mesh model
+        max_num_faces=1,  # Maximum number of faces to detect
+        min_detection_confidence=0.5,  # Confidence threshold for detection, closer to 1 for higher accuracy
+        min_tracking_confidence=0.5,  # Tracking threshold
+    )
         
     # Establish a TCP connection to Unity
     if args.connect:
-        address = ('127.0.0.1', args.port)
+        address = ('127.0.0.1', 14514) # default port number 14514
         sock = Socket()
         sock.connect(address)
 
     ts = []
     frame_count = 0
-    no_face_count = 0
     
     prev_pose = None
+    pose_model = pickle.load(open('./model.pkl', 'rb'))
 
     while cap.isOpened():
         # Get frames
@@ -84,10 +79,10 @@ def run():
         # 2. Pose estimation and stabilization (face + iris), calculate and calibrate data if error is low
         # 3. Data transmission with socket
 
-        # Face detection on every odd frame
+        # Face detection on every frame
         face_detection_result = face_detector.process(frame_RGB)
         if face_detection_result.detections is None:
-            no_face_count = 0
+            continue
         else:
             face_detection = face_detection_result.detections[0]
             bboxC = face_detection.location_data.relative_bounding_box
@@ -98,29 +93,23 @@ def run():
         # Face is detected
         if facebox is not None:
             # Mark face and iris on each frame
-            if not args.gpu:
-                raise NotImplementedError
-            else:
-                # Draw landmarks on first frame or each even frame
-                # 处理图像并获取面部关键点
-                results = face_mesh_model.process(frame_RGB)
-                if results.multi_face_landmarks is None:
-                    continue
-                face_landmarks_3d = results.multi_face_landmarks[0]
+            
+            # Process the image and obtain facial keypoints
+            results = face_mesh_model.process(frame_RGB)
+            if results.multi_face_landmarks is None:
+                continue
+            face_landmarks_3d = results.multi_face_landmarks[0]
 
-                # 投影到二维平面
-                h, w, _ = frame.shape
-                marks = []
-                marks_3d = []
-                for landmark_3d in face_landmarks_3d.landmark:
-                    x = int(landmark_3d.x * w)
-                    y = int(landmark_3d.y * h)
-                    marks.append((x, y))
-                    marks_3d.append((x, y, landmark_3d.z))
-                marks = np.array(marks, dtype=np.int32)
-                marks_3d = np.array(marks_3d, dtype=np.float64)
+            # Project to a 2D plane
+            h, w, _ = frame.shape
+            marks = []
+            for landmark_3d in face_landmarks_3d.landmark:
+                x = int(landmark_3d.x * w)
+                y = int(landmark_3d.y * h)
+                marks.append((x, y))
+            marks = np.array(marks, dtype=np.int32)
 
-            # 定义眉毛、眼睛、瞳孔、嘴巴对应的点索引
+            # Get indices of facial landmarks
             indices = utils.get_indices()
             x_l, y_l = marks[indices['left_iris']]
             x_r, y_r = marks[indices['right_iris']]
@@ -157,9 +146,9 @@ def run():
                 # Calibration before data transmission
                 # eye openness
                 eyeOpenLeft = utils.calibrate_eyeOpen(
-                    earLeft, sock.eyeOpenLeftLast, args.gpu)
+                    earLeft, sock.eyeOpenLeftLast)
                 eyeOpenRight = utils.calibrate_eyeOpen(
-                    earRight, sock.eyeOpenRightLast, args.gpu)
+                    earRight, sock.eyeOpenRightLast)
 
                 # eyeballs
                 eyeballX, eyeballY = utils.calibrate_eyeball(
@@ -167,13 +156,13 @@ def run():
 
                 # eyebrows
                 eyebrowLeft = utils.calibrate_eyebrow(
-                    barLeft, sock.eyebrowLeftLast, args.gpu)
+                    barLeft, sock.eyebrowLeftLast)
                 eyebrowRight = utils.calibrate_eyebrow(
-                    barRight, sock.eyebrowRightLast, args.gpu)
+                    barRight, sock.eyebrowRightLast)
 
                 # mouth width
                 mouthWidth = utils.calibrate_mouthWidth(
-                    mouthWidthRatio, args.gpu)
+                    mouthWidthRatio)
 
                 # Update
                 sock.update_all(roll, pitch, yaw, eyeOpenLeft, eyeOpenRight, eyeballX,
@@ -223,15 +212,9 @@ if __name__ == '__main__':
     parser.add_argument("--debug", action="store_true",
                         help="show image and marks",
                         default=False)
-    parser.add_argument("--gpu", action="store_true",
-                        help="use GPU to do face detection and face landmark detection",
-                        default=True)
     parser.add_argument("--connect", action="store_true",
                         help="connect to unity character",
                         default=False)
-    parser.add_argument("--port", type=int,
-                        help="set port number to connect",
-                        default=14514)
     parser.add_argument("--video", type=str,
                     help="specify the path to the video file (if not using camera)",
                     default=None)

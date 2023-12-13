@@ -27,8 +27,6 @@ def draw_FPS(frame, FPS):
 
 def eye_aspect_ratio(eye):
     """eye: np.array, shape (16, 2)"""
-    # ear = np.linalg.norm(eye[1] - eye[5]) + np.linalg.norm(eye[2] - eye[4])
-    # ear /= (2 * np.linalg.norm(eye[0] - eye[3]) + 1e-6)
     assert eye.shape[0] % 2 == 0
     ear = 0
     for i in range (1, int(eye.shape[0]/2)):
@@ -90,63 +88,34 @@ def mouth_aspect_ratio(mouth):
     mar /= (2 * np.linalg.norm(mouth[0] - mouth[int(mouth.shape[0]/2)]) + 1e-6)
     return mar
 
-def calibrate_eyeOpen(ear, eyeOpenLast, gpu):
+def calibrate_eyeOpen(ear, eyeOpenLast):
     """Calibrate parameter eyeOpen"""
     flag = False  # jump out of current state
-
-    if not gpu:
-        # CPU env
-        if eyeOpenLast == 0.0:
-            if ear > 0.17:
-                flag = True
-        if eyeOpenLast == 0.5:
-            if abs(ear - 0.15) > 0.03:
-                flag = True
-        elif eyeOpenLast == 1.0:
-            if abs(ear - 0.19) > 0.035:
-                flag = True
-        else:
-            if ear < 0.22:
-                flag = True
-
-        if flag:
-            if ear <= 0.14:
-                eyeOpen = 0.0
-            elif ear > 0.14 and ear <= 0.16:
-                eyeOpen = 0.5
-            elif ear > 0.16 and ear <= 0.22:
-                eyeOpen = 1.0
-            else:
-                eyeOpen = 1.2
-        else:
-            eyeOpen = eyeOpenLast
-
+    
+    if eyeOpenLast == 0.0:
+        if ear > 0.25:
+            flag = True
+    if eyeOpenLast == 0.5:
+        if abs(ear - 0.21) > 0.04:
+            flag = True
+    elif eyeOpenLast == 1.0:
+        if abs(ear - 0.24) > 0.07:
+            flag = True
     else:
-        # GPU env
-        if eyeOpenLast == 0.0:
-            if ear > 0.25:
-                flag = True
-        if eyeOpenLast == 0.5:
-            if abs(ear - 0.21) > 0.04:
-                flag = True
-        elif eyeOpenLast == 1.0:
-            if abs(ear - 0.24) > 0.07:
-                flag = True
-        else:
-            if ear < 0.17:
-                flag = True
+        if ear < 0.17:
+            flag = True
 
-        if flag:
-            if ear <= 0.22:
-                eyeOpen = 0.0
-            elif ear > 0.22 and ear <= 0.23:
-                eyeOpen = 0.5
-            elif ear > 0.23 and ear <= 0.27:
-                eyeOpen = 1.0
-            else:
-                eyeOpen = 1.2
+    if flag:
+        if ear <= 0.22:
+            eyeOpen = 0.0
+        elif ear > 0.22 and ear <= 0.23:
+            eyeOpen = 0.5
+        elif ear > 0.23 and ear <= 0.27:
+            eyeOpen = 1.0
         else:
-            eyeOpen = eyeOpenLast
+            eyeOpen = 1.2
+    else:
+        eyeOpen = eyeOpenLast
 
     return eyeOpen
 
@@ -156,69 +125,42 @@ def calibrate_eyeball(eyeballX, eyeballY):
     return (eyeballX - 0.45) * 4.0, (eyeballY - 0.38) * 2.0
 
 
-def calibrate_eyebrow(bar, eyebroLast, gpu):
+def calibrate_eyebrow(bar, eyebroLast):
     """Calibrate parameter eyebrow"""
     flag = False  # jump out of current state
 
-    if not gpu:
-        # CPU env
-        if eyebroLast == -1.0:
-            if bar > 0.22:
-                flag = True
-        else:
-            if bar < 0.2:
-                flag = True
-
-        if flag:
-            if bar <= 0.215:
-                eyebrow = -1.0
-            else:
-                eyebrow = 0.0
-        else:
-            eyebrow = eyebroLast
+    if eyebroLast == -1.0:
+        if bar > 0.22:
+            flag = True
     else:
-        # GPU env
-        if eyebroLast == -1.0:
-            if bar > 0.22:
-                flag = True
-        else:
-            if bar < 0.2:
-                flag = True
+        if bar < 0.2:
+            flag = True
 
-        if flag:
-            if bar <= 0.225:
-                eyebrow = -1.0
-            else:
-                eyebrow = 0.0
+    if flag:
+        if bar <= 0.225:
+            eyebrow = -1.0
         else:
-            eyebrow = eyebroLast
+            eyebrow = 0.0
+    else:
+        eyebrow = eyebroLast
 
     return eyebrow
 
 
-def calibrate_mouthWidth(mouthWidthRatio, gpu):
+def calibrate_mouthWidth(mouthWidthRatio):
     """Calibrate parameter mouthWidth"""
-    if not gpu:
-        # CPU env
-        if mouthWidthRatio <= 0.27:
-            mouthWidth = -0.5
-        elif mouthWidthRatio > 0.27 and mouthWidthRatio <= 0.35:
-            mouthWidth = 18.75 * mouthWidthRatio - 5.5625
-        else:
-            mouthWidth = 1.0
+    if mouthWidthRatio <= 0.32:
+        mouthWidth = -0.5
+    elif mouthWidthRatio > 0.32 and mouthWidthRatio <= 0.37:
+        mouthWidth = 30.0 * mouthWidthRatio - 10.1
     else:
-        # GPU env
-        if mouthWidthRatio <= 0.32:
-            mouthWidth = -0.5
-        elif mouthWidthRatio > 0.32 and mouthWidthRatio <= 0.37:
-            mouthWidth = 30.0 * mouthWidthRatio - 10.1
-        else:
-            mouthWidth = 1.0
+        mouthWidth = 1.0
 
     return mouthWidth
 
 
 def get_pose(model, marks):
+    """Predict pose from facial landmarks"""
     marks = marks.flatten()
     cols = []
     for pos in ['nose_', 'forehead_', 'left_eye_', 'mouth_left_', 'chin_', 'right_eye_', 'mouth_right_']:
@@ -232,6 +174,7 @@ def get_pose(model, marks):
 
 
 def normalize(poses_df):
+    """Normalize facial landmarks"""
     normalized_df = poses_df.copy()
     
     for dim in ['x', 'y']:
@@ -249,30 +192,32 @@ def normalize(poses_df):
 
 
 def draw_marks(img, marks, indices):
-    # 在图像上绘制不同颜色的圆圈
+    """Draw marks on image"""
+    # Draw circles of different colors on the image
     new_img = img.copy()
     for i, landmark_2d in enumerate(marks):
         color = None
         if i in indices['left_eyebrow']:
-            color = (255, 0, 0)  # 眉毛的颜色为红色
+            color = (255, 0, 0)  # Color for left eyebrow is red
         elif i in indices['right_eyebrow']:
-            color = (0, 0, 255)  # 眼睛的颜色为蓝色
+            color = (0, 0, 255)  # Color for right eyebrow is blue
         elif i in indices['left_eye']:
-            color = (0, 255, 0)  # 眼睛的颜色为绿色
+            color = (0, 255, 0)  # Color for left eye is green
         elif i in indices['right_eye']:
-            color = (0, 255, 255)  # 瞳孔的颜色为黄色
+            color = (0, 255, 255)  # Color for right eye is yellow
         elif i in indices['left_pupil']:
-            color = (255, 0, 255) # 瞳孔的颜色为紫色
+            color = (255, 0, 255)  # Color for left pupil is purple
         elif i in indices['right_pupil']:
-            color = (255, 255, 0) # 瞳孔的颜色为青色
+            color = (255, 255, 0)  # Color for right pupil is cyan
         elif i in indices['mouth']:
-            color = (225, 225, 225)  # 嘴巴的颜色为白色
+            color = (225, 225, 225)  # Color for mouth is white
         if color is not None:
             cv2.circle(new_img, landmark_2d, 2, color, -1)
     return new_img
 
 
 def draw_axes(img, pitch, yaw, roll, tx, ty, size=50):
+    """Draw axes on image"""
     yaw = -yaw
     rotation_matrix = cv2.Rodrigues(np.array([pitch, yaw, roll]))[0].astype(np.float64)
     axes_points = np.array([
@@ -293,7 +238,8 @@ def draw_axes(img, pitch, yaw, roll, tx, ty, size=50):
 
 
 def get_indices():
-    # 定义眉毛、眼睛、瞳孔、嘴巴对应的点索引
+    """Get indices of facial landmarks"""
+    # Define point indices for eyebrows, eyes, pupils, mouth
     left_eyebrow_indices = [336, 296, 334, 293, 300, 276, 283, 282, 295, 285]
     right_eyebrow_indices = [70, 63, 105, 66, 107, 55, 65, 52, 53, 46]
     left_eye_indices = [362, 398, 384, 385, 386, 387, 388, 466, 263, 249, 390, 373, 374, 380, 381, 382]
@@ -307,7 +253,7 @@ def get_indices():
     mouth_inner_indices = [78, 191, 80, 81, 82, 13, 312, 311, 310, 415, 308, 324, 318, 402, 317, 14, 87, 178, 88, 95]
     pose_indices = [1, 10, 33, 61, 199, 263, 291] # Nose, Forehead, Left eye, Left mouth, Chin, Right eye, Right mouth
     
-    # return a dictionary
+    # Return a dictionary
     return {'left_eyebrow': left_eyebrow_indices, 'right_eyebrow': right_eyebrow_indices, 
             'left_eye': left_eye_indices, 'right_eye': right_eye_indices, 
             'left_iris': left_iris_indices, 'right_iris': right_iris_indices, 
