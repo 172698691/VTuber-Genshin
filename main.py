@@ -86,7 +86,7 @@ def run():
 
         # Face detection on every odd frame
         face_detection_result = face_detector.process(frame_RGB)
-        if face_detection_result is None:
+        if face_detection_result.detections is None:
             no_face_count = 0
         else:
             face_detection = face_detection_result.detections[0]
@@ -104,6 +104,8 @@ def run():
                 # Draw landmarks on first frame or each even frame
                 # 处理图像并获取面部关键点
                 results = face_mesh_model.process(frame_RGB)
+                if results.multi_face_landmarks is None:
+                    continue
                 face_landmarks_3d = results.multi_face_landmarks[0]
 
                 # 投影到二维平面
