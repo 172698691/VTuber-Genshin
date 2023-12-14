@@ -31,7 +31,7 @@ python main.py --debug
 Press `q` to exit the program.
 
 <p align = "center">
-    <img src = "img_source\face.gif" width = "240px" height = "240px"/>
+    <img src = "img_source\face.gif" width = "300px" height = "300px"/>
 </p>
 
 **Step 2 : Connect Unity**
@@ -53,5 +53,5 @@ python main.py --connect --video /path_of_video
 Press `q` to exit the program.
 
 <p align = "center">
-    <img src = "img_source\result.gif" width = "630px" height = "270px"/>
+    <img src = "img_source\result.gif" width = "735px" height = "315px"/>
 </p>
