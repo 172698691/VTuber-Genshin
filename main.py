@@ -189,11 +189,10 @@ def run():
         FPS = int(1 / (np.mean(ts[-10:]) + 1e-6))
         print('\r', 'Time: %.3f' % dt, end=' ')
 
-        if args.debug:
-            utils.draw_FPS(frame, FPS)
-            cv2.imshow("face", frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to exit
-                break
+        utils.draw_FPS(frame, FPS)
+        cv2.imshow("face", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to exit
+            break
 
     # Close all if program is terminated
     cap.release()

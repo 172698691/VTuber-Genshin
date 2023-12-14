@@ -26,14 +26,14 @@ First, run the Unity executable file `Genshin-vtuber.exe`.
 
 Then run with camera
 ```bash
-python main.py --debug --connect
+python main.py --connect
 ```
 
 or
 
 run with video (replace `/path_of_video` with your actual paths)
 ```bash
-python main.py --debug --connect --video /path_of_video
+python main.py --connect --video /path_of_video
 ```
 
 Press `q` to exit the program.
