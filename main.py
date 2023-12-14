@@ -114,9 +114,10 @@ def run():
             x_l, y_l = marks[indices['left_iris']]
             x_r, y_r = marks[indices['right_iris']]
             
+            pitch_pred, yaw_pred, roll_pred = utils.get_pose(pose_model, marks[indices['pose']])
+            
             if args.connect:
                 # head
-                pitch_pred, yaw_pred, roll_pred = utils.get_pose(pose_model, marks[indices['pose']])
                 roll_r, pitch_r, yaw_r = np.degrees(roll_pred), np.degrees(pitch_pred), np.degrees(-yaw_pred)
                 # Stabilization
                 if prev_pose is not None:
@@ -190,6 +191,8 @@ def run():
         print('\r', 'Time: %.3f' % dt, end=' ')
 
         utils.draw_FPS(frame, FPS)
+        cv2.namedWindow("face", cv2.WINDOW_NORMAL)  # 使用cv2.WINDOW_NORMAL以支持手动调整大小
+        cv2.resizeWindow("face", 512, 512)
         cv2.imshow("face", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to exit
             break
