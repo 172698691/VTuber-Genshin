@@ -22,6 +22,20 @@ pip install -r requirements.txt
 
 ## Run
 
+**Step 1 : Test camera**
+
+Run the following code, you should see your face with marks.
+```bash
+python main.py --debug
+```
+Press `q` to exit the program.
+
+<p align = "center">
+    <img src = "img_source\face.gif" width = "240px" height = "240px"/>
+</p>
+
+**Step 2 : Connect Unity**
+
 First, run the Unity executable file `Genshin-vtuber.exe`.
 
 Then run with camera
@@ -37,3 +51,7 @@ python main.py --connect --video /path_of_video
 ```
 
 Press `q` to exit the program.
+
+<p align = "center">
+    <img src = "img_source\result.gif" width = "630px" height = "270px"/>
+</p>
