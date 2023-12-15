@@ -1,4 +1,4 @@
-# INF573 - Image Analysis and Computer Vision
+# Genshin VTuber
 
 This is the final project of course **INF573 - Image Analysis and Computer Vision**. We implement a Genshin VTuber base on [VTuber-MomoseHiyori](https://github.com/KennardWang/VTuber-MomoseHiyori) by KennardWang.
 
@@ -55,3 +55,13 @@ Press `q` to exit the program.
 <p align = "center">
     <img src = "img_source\result.gif" width = "735px" height = "315px"/>
 </p>
+
+## Reference
+
+- [VTuber-MomoseHiyori](https://github.com/KennardWang/VTuber-MomoseHiyori) by KennardWang
+
+- [Head Pose Estimation](https://github.com/Mostafa-Nafie/Head-Pose-Estimation) by Mostafa-Nafie
+
+- [Google MediaPipe](https://developers.google.com/mediapipe/solutions/guide)
+
+- [VTuber Live2D model](https://www.bilibili.com/video/BV1Bv4y1f7fb/?spm_id_from=333.337.search-card.all.click&vd_source=7ed05cf13083e303ef773860e10d0749) by HyouKoki
