@@ -191,8 +191,8 @@ def run():
         print('\r', 'Time: %.3f' % dt, end=' ')
 
         utils.draw_FPS(frame, FPS)
-        cv2.namedWindow("face", cv2.WINDOW_NORMAL)  # 使用cv2.WINDOW_NORMAL以支持手动调整大小
-        cv2.resizeWindow("face", 512, 512)
+        # cv2.namedWindow("face", cv2.WINDOW_NORMAL)  # use cv2.WINDOW_NORMAL to allow resizing the window
+        # cv2.resizeWindow("face", int(frame.shape[1]*0.71), int(frame.shape[0]*0.71))
         cv2.imshow("face", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):  # press q to exit
             break

@@ -62,6 +62,6 @@ Press `q` to exit the program.
 
 - [Head Pose Estimation](https://github.com/Mostafa-Nafie/Head-Pose-Estimation) by Mostafa-Nafie
 
-- [Google MediaPipe](https://developers.google.com/mediapipe/solutions/guide)
+- [Google MediaPipe](https://developers.google.com/mediapipe)
 
 - [VTuber Live2D model](https://www.bilibili.com/video/BV1Bv4y1f7fb/?spm_id_from=333.337.search-card.all.click&vd_source=7ed05cf13083e303ef773860e10d0749) by HyouKoki
