@@ -2,6 +2,11 @@
 
 This is the final project of course **INF573 - Image Analysis and Computer Vision**. We implement a Genshin VTuber base on [VTuber-MomoseHiyori](https://github.com/KennardWang/VTuber-MomoseHiyori) by KennardWang.
 
+<p align = "center">
+    <img src = "img_source\原神启动.gif" width = "320px" height = "180px"/>
+    <figcaption style="text-align: center;">原神启动！</figcaption>
+</p>
+
 ## Notes
 
 This program is implemented base on Windows 10 x64 System. Using Python 3.8 and Unity 2019.4.1f1. The Unity Engine use port number `14514`.
