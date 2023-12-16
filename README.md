@@ -2,9 +2,12 @@
 
 This is the final project of course **INF573 - Image Analysis and Computer Vision**. We implement a Genshin VTuber base on [VTuber-MomoseHiyori](https://github.com/KennardWang/VTuber-MomoseHiyori) by KennardWang.
 
+<p align="center">
+    <b>原神启动！</b>
+</p>
+
 <p align = "center">
     <img src = "img_source\原神启动.gif" width = "320px" height = "180px"/>
-    <figcaption style="text-align: center;">原神启动！</figcaption>
 </p>
 
 ## Notes
